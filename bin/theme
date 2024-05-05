@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 script_name="$(basename $0)"
 assets="$PREFIX/share/termux-styles/themes"
+default_theme="base16-3024-dark"
 
 # Function to display help message
 print_usage() {
@@ -22,12 +23,31 @@ error() {
     print_usage
 }
 
-# Ensure 'assets' exists and is not empty
+apply_theme() {
+    local theme="$1"
+    local destination="$HOME/.termux/colors.properties"
+
+    # Ensure 'theme' exists
+    if [[ ! -f "$theme" ]]; then
+        error "Theme not found: $theme"
+        return 1
+    fi
+
+    # Apply theme
+    cp "$theme" "$destination"
+    termux-reload-settings
+}
+
+
+# Ensure 'assets' exists
 if [[ ! -d "$assets" ]]; then
     error "Missing directory: $assets"
     exit 1
-elif [[ -z "$(ls -A $assets)" ]]; then
-    error "Empty directory: $assets"
+fi
+
+# Ensure 'assets' contains at least one .properties file
+if [[ ! $(find "$assets" -maxdepth 1 -type f -name '*.properties') ]]; then
+    error "No properties files found: $assets"
     exit 1
 fi
 
@@ -38,11 +58,25 @@ if [[ "$#" -eq 0 ]]; then
 fi
 
 # Parse arguments
+theme=""
 while [[ "$#" -gt 0 ]]; do
     case "$1" in
         -h|--help|-help|help|h)
             print_usage
             exit 0
+            ;;
+        apply|set)
+            if [[ -z "$2" || "$2" = -* ]]; then
+                theme=$(select_theme) || exit 1
+            else
+                theme="$2"
+                shift
+            fi
+            apply_theme "$theme"
+            ;;
+        default)
+            apply_theme "$default_theme"
+            exit "$?"
             ;;
         -*)
             error "Unknown option: $1"
