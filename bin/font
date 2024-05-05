@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 script_name="$(basename $0)"
 assets="$PREFIX/share/termux-styles/fonts"
-default_font=""
 
 # Function to display help message
 print_usage() {
@@ -11,6 +10,7 @@ print_usage() {
     echo ""
     echo "Arguments:"
     echo "  apply"
+    echo "  default"
     echo ""
     echo "Options:"
     echo "  -h|--help         Print this message."
@@ -37,6 +37,27 @@ apply_font() {
     # Apply font
     cp "$font" "$destination"
     termux-reload-settings
+}
+
+select_font() {
+    local selection
+
+    # 
+    selection=$(ls "$assets"/*.ttf | xargs -n1 basename --suffix=".ttf" | fzf)
+    if [[ "$?" -gt 0 || -z "$selection" ]]; then
+        error "Failed to select a font"
+        return 1
+    fi
+
+    # Ensure selection exists
+    selection="$assets/$selection.ttf"
+    if [[ ! -f "$selection" ]]; then 
+        error "Missing file: $selection"
+        return 1
+    fi
+
+    # Return 'selection'
+    echo "$selection"
 }
 
 # Ensure 'assets' exists
@@ -75,7 +96,7 @@ while [[ "$#" -gt 0 ]]; do
             apply_font "$font"
             ;;
         default)
-            apply_font "$default_font"
+            apply_font "$assets/Hack.ttf"
             exit "$?"
             ;;
         -*)
