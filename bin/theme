@@ -1,1 +1,57 @@
 #!/usr/bin/env bash
+script_name="$(basename $0)"
+assets="$PREFIX/share/termux-styles/themes"
+
+# Function to display help message
+print_usage() {
+    echo "Usage: ${script_name} [arguments] [options]"
+    echo ""
+    echo "Script to manage termux themes."
+    echo ""
+    echo "Arguments:"
+    echo ""
+    echo "Options:"
+    echo "  -h|--help         Print this message."
+    echo ""
+}
+
+# Function to print error and help messages
+error() {
+    local errmsg="${1:-Unknown error}"
+    echo -e "\033[1;31mError\033[0m: ${errmsg}\n" 1>&2
+    print_usage
+}
+
+# Ensure 'assets' exists and is not empty
+if [[ ! -d "$assets" ]]; then
+    error "Missing directory: $assets"
+    exit 1
+elif [[ -z "$(ls -A $assets)" ]]; then
+    error "Empty directory: $assets"
+    exit 1
+fi
+
+# Get some help
+if [[ "$#" -eq 0 ]]; then
+    print_usage
+    exit 1
+fi
+
+# Parse arguments
+while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+        -h|--help|-help|help|h)
+            print_usage
+            exit 0
+            ;;
+        -*)
+            error "Unknown option: $1"
+            exit 1
+            ;;
+        *)
+            error "Unknown argument: $1"
+            exit 1
+            ;;
+    esac
+    shift
+done

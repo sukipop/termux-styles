@@ -7,6 +7,28 @@ error() {
     echo -e "\033[1;31mError\033[0m: ${errmsg}\n" 1>&2
 }
 
+install_scripts() {
+    # Check on project bin
+    if [[ ! -d "bin" ]]; then
+        error "Missing bin"
+        return 1
+    elif [[ -z "$(ls -A bin)" ]]; then
+        error "Empty bin"
+        return 1
+    fi
+
+    # Copy scripts to termux bin
+    for file in bin/*; do
+        file_name=$(basename "$file")
+        destination="$PREFIX/bin/$file_name"
+        rm -rf "$destination"
+        if ! cp "$file" "$destination"; then
+            error "Failed to copy to bin: $file_name"
+            return 1
+        fi
+    done
+}
+
 create_share() {
     local share_dir="$PREFIX/share/termux-styles"
 
@@ -15,7 +37,7 @@ create_share() {
     rm -rf "$share_dir"/* || return 1
 
     # Copy share content
-    cp share/* "$share_dir" || return 1
+    cp -r share/* "$share_dir" || return 1
 }
 
 # Ensure 'PREFIX' is defined
@@ -25,4 +47,5 @@ if [[ -z "$PREFIX" ]]; then
 fi
 
 echo "Installing termux-textgen..."
-create_share || error "Failed to create share"
+install_scripts || exit 1
+create_share || { error "Failed to create share"; exit 1; }
