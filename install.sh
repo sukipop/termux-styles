@@ -9,9 +9,13 @@ error() {
 
 create_share() {
     local share_dir="$PREFIX/share/termux-styles"
-    mkdir -p "$share_dir"
-    rm -rf "$share_dir"/*
-    cp share/* "$share_dir"
+
+    # Ensure 'share_dir' is empty
+    mkdir -p "$share_dir" || return 1
+    rm -rf "$share_dir"/* || return 1
+
+    # Copy share content
+    cp share/* "$share_dir" || return 1
 }
 
 # Ensure 'PREFIX' is defined
@@ -21,4 +25,4 @@ if [[ -z "$PREFIX" ]]; then
 fi
 
 echo "Installing termux-textgen..."
-create_share || error
+create_share || error "Failed to create share"
