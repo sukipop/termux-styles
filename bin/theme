@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 script_name="$(basename $0)"
 assets="$PREFIX/share/termux-styles/themes"
-default_theme="base16-3024-dark"
 
 # Function to display help message
 print_usage() {
@@ -10,6 +9,9 @@ print_usage() {
     echo "Script to manage termux themes."
     echo ""
     echo "Arguments:"
+    echo "  apply [theme]     Apply theme."
+    echo "  dark              Enable dark theme."
+    echo "  light             Enable light theme."
     echo ""
     echo "Options:"
     echo "  -h|--help         Print this message."
@@ -38,6 +40,26 @@ apply_theme() {
     termux-reload-settings
 }
 
+select_theme() {
+    local selection
+
+    # 
+    selection=$(ls "$assets"/*.properties | xargs -n1 basename --suffix=".properties" | fzf)
+    if [[ "$?" -gt 0 || -z "$selection" ]]; then
+        error "Failed to select a theme"
+        return 1
+    fi
+
+    # Ensure selection exists
+    selection="$assets/$selection.properties"
+    if [[ ! -f "$selection" ]]; then 
+        error "Missing file: $selection"
+        return 1
+    fi
+
+    # Return 'selection'
+    echo "$selection"
+}
 
 # Ensure 'assets' exists
 if [[ ! -d "$assets" ]]; then
@@ -74,8 +96,12 @@ while [[ "$#" -gt 0 ]]; do
             fi
             apply_theme "$theme"
             ;;
-        default)
-            apply_theme "$default_theme"
+        dark)
+            apply_theme "$assets/base16-3024-dark.properties"
+            exit "$?"
+            ;;
+        light)
+            apply_theme "$assets/base16-3024-light.properties"
             exit "$?"
             ;;
         -*)
