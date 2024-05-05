@@ -46,6 +46,6 @@ if [[ -z "$PREFIX" ]]; then
     exit 1
 fi
 
-echo "Installing termux-textgen..."
+echo "Installing termux-styles..."
 install_scripts || exit 1
 create_share || { error "Failed to create share"; exit 1; }
