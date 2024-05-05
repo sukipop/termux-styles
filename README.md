@@ -20,20 +20,20 @@ This will add the `font` and `theme` commands to Termux.
 
 ```
 font [arguments] [options]
+```
 
 - `apply [font]`: Apply a font.
 - `default`: Enable the default font.
-```
 
 ### Theme Management
 
 ```
 theme [arguments] [options]
+```
 
 - `apply [theme]`: Apply a theme.
 - `dark`: Enable the dark theme.
 - `light`: Enable the light theme.
-```
 
 # License
 
